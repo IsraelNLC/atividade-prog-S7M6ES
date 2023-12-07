@@ -33,7 +33,7 @@ def get_db():
         db.close()
 
 
-DATABASE_URL = "sqlite:///./db/db.db"
+DATABASE_URL = "sqlite:///../db/db.db"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
