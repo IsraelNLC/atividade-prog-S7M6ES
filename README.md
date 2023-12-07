@@ -13,7 +13,7 @@ A API em questão é um sistema de Geração e Gerenciamento de Histórias Inter
   git clone https://github.com/seu-usuario/seu-repositorio.git
   cd seu-repositorio
   ```
-3. Instale as dependências
+3. Instale as [dependências]("./requirements.txt")
    ```cmd
    pip install -r requirements.txt
    ```
@@ -104,14 +104,7 @@ Obter lista de uruários (incluindo senhas, para debug)
 * **Endpoint**: `/usersdebug`
 * **Descrição**: Obtém uma lista de todos os usuários, incluindo suas senhas em hash
 * **Parâmetros**: nenhum
-
-* **Método**: ``
-* **Endpoint**: ``
-* **Descrição**:
-* **Parâmetros**:
-  * `` ():
-  * `` ():
-
+  
 
 ### Histórias (Stories)
 
