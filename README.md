@@ -5,12 +5,12 @@ A API em questão é um sistema de Geração e Gerenciamento de Histórias Inter
 ## Instalação 
 1. Clone o repositório:
    ```cmd
-    git clone https://github.com/seu-usuario/seu-repositorio.git
-    cd seu-repositorio
+    git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/IsraelNLC/atividade-prog-S7M6ES)
+    cd sua-pasta
    ```
 2. Instale as dependências
  ```cmd
-  git clone https://github.com/seu-usuario/seu-repositorio.git
+  git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/IsraelNLC/atividade-prog-S7M6ES)
   cd seu-repositorio
   ```
 3. Instale as [dependências]("./requirements.txt")
