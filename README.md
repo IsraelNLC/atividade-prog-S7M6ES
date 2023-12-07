@@ -5,19 +5,14 @@ A API em questão é um sistema de Geração e Gerenciamento de Histórias Inter
 ## Instalação 
 1. Clone o repositório:
    ```cmd
-    git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/IsraelNLC/atividade-prog-S7M6ES)
+    git clone https://github.com/seu-usuario/seu-repositorio.git
     cd sua-pasta
    ```
-2. Instale as dependências
- ```cmd
-  git clone [https://github.com/seu-usuario/seu-repositorio.git](https://github.com/IsraelNLC/atividade-prog-S7M6ES)
-  cd seu-repositorio
-  ```
-3. Instale as [dependências]("./requirements.txt")
+2. Instale as [dependências]("./requirements.txt")
    ```cmd
    pip install -r requirements.txt
    ```
-4. Configure as variáveis de ambiente:
+3. Configure as variáveis de ambiente:
    Crie um arquivo .env na raiz do projeto com as variáveis:
 ```env
 SECRET_KEY = "chave_secreta"
