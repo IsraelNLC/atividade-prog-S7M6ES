@@ -17,8 +17,11 @@ def create_access_token(data: dict, expires_delta: timedelta):
     return encoded_jwt
 
 def decode_access_token(token: str):
-    print('decoded:' , jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]))
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    try :
+        print('decoded:' , jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]))
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except:
+        return None
 
 def expiration_time():
     return timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
