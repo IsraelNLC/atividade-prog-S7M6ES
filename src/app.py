@@ -6,10 +6,24 @@ from passlib.context import CryptContext
 from generateToken import create_access_token, expiration_time, decode_access_token
 
 from databases import Database
-from sqlalchemy import create_engine, Column, Integer, String, MetaData, Table, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, MetaData, Table, Boolean, ForeignKey, Text
 from sqlalchemy.orm import sessionmaker, Session
 
 from sqlalchemy.orm import Session
+
+import os
+from bardapi import BardCookies
+from dotenv import load_dotenv
+load_dotenv()
+
+cookie_dict = {
+    "__Secure-1PSID": os.getenv("BARD_TOKEN"),
+    "__Secure-1PSIDTS": os.getenv("BARD_TOKEN_TS"),
+    # Any cookie values you want to pass session object.
+}
+
+bard = BardCookies(cookie_dict=cookie_dict)
+
 
 def get_db():
     db = SessionLocal()
@@ -37,41 +51,22 @@ users = Table(
     Column("disabled", Boolean, nullable=True),
 )
 
+user_history = Table(
+    "user_history",
+    metadata,
+    Column("id", Integer, primary_key=True, index=True),
+    Column("username", String(50), ForeignKey("users.username"), index=True),
+    Column("prompt", Text, nullable=False),
+    Column("historia", Text, nullable=False),
+    Column("titulo", String(50), nullable=False),
+    Column("categoria", String(50), nullable=False),
+)
+
 metadata.create_all(bind=engine)
     
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# users_db = {
-#     "johndoe": {
-#         "username": "johndoe",
-#         "full_name": "John Doe",
-#         "email": "johndoe@example.com",
-#         "hashed_password": "secret",
-#         "disabled": False,
-#     },
-#     "alice": {
-#         "username": "alice",
-#         "full_name": "Alice Wonderson",
-#         "email": "alice@example.com",
-#         "hashed_password": "secret2",
-#         "disabled": True,
-#     },
-# }
-
-
-# def hash_all_password():
-#     #hash database passwords
-#     for user in users_db:
-#         users_db[user]["hashed_password"] = pwd_context.hash(users_db[user]["hashed_password"])
-#         print(users_db[user]["hashed_password"])
-
-# hash_all_password()
-
 app = FastAPI()
-
-
-def hash_password(password):
-    return pwd_context.hash(password)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -109,9 +104,18 @@ class UserCreate(User):
             "disabled": self.disabled,
         }
 
+class Historia(BaseModel):
+    titulo: str
+    historia: str | None = None
+    categoria: str
+
+class HistoriaInDB(Historia):
+    prompt: str
 
 
 
+def hash_password(password):
+    return pwd_context.hash(password)
 
 def get_user(db: Session, username: str):
     query = users.select().where(users.c.username == username)
@@ -120,9 +124,6 @@ def get_user(db: Session, username: str):
     if user:
         return UserInDB(**user)
     return None
-
-
-
 
 
 async def get_current_user(
@@ -235,6 +236,62 @@ async def read_users_password(db: Session = Depends(get_db)):
     result = db.execute(query)
     return result.fetchall()
 
+@app.post("/story")
+async def create_historia(
+    historia: Historia,
+    authentication: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    if not authentication:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+    # check if titulo already exists
+    if db.execute(user_history.select().where(user_history.c.titulo == historia.titulo)).fetchone():
+        raise HTTPException(status_code=400, detail="Titulo already exists")
+    prompt = "Complete a historia da categoria " + historia.categoria + "..." + historia.historia
+    response = bard.get_answer(prompt)['content']
+    query = user_history.insert().values(username=authentication.username, prompt=prompt, historia=response, titulo=historia.titulo, categoria=historia.categoria)
+    result = db.execute(query)
+    db.commit()
+    return response
+
+@app.get("/stories")
+async def read_historia(
+    authentication: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    if not authentication:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+    query = user_history.select()
+    result = db.execute(query)
+    return result.fetchall()
+
+@app.patch("/updatestory")
+async def update_historia(
+    historia: Historia,
+    authentication: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    if not authentication:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+    query = user_history.update().where(user_history.c.titulo == historia.titulo).where(user_history.c.categoria == historia.categoria).values(historia=historia.historia)
+    result = db.execute(query)
+    db.commit()
+    return historia.historia
+
+@app.delete("/deletestory")
+async def delete_historia(
+    historia: Historia,
+    authentication: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    if not authentication:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+    titulo = historia.titulo
+    categoria = historia.categoria
+    query = user_history.delete().where(user_history.c.titulo == titulo).where(user_history.c.categoria == categoria)
+    result = db.execute(query)
+    db.commit()
+    return {"message": "Historia deleted successfully"}
 
 
 
