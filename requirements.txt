@@ -1,0 +1,8 @@
+fastapi==0.68.1
+passlib==1.7.4
+pydantic==1.8.3
+databases==0.5.12
+sqlalchemy==1.4.23
+python-dotenv==0.19.0
+uvicorn==0.15.0
+bardapi>=1.0.0
